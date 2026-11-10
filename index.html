@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visual Lab — интерактивные визуализации</title>
+  <meta name="description" content="Пять интерактивных экспериментов в браузере: муравей Лэнгтона, поверхность sin(√(x²+y²)), гипотеза Коллатца, фрактальная черепаха и симулятор слота.">
+  <meta name="theme-color" content="#0b0e17">
+  <meta property="og:title" content="Visual Lab — интерактивные визуализации">
+  <meta property="og:description" content="Клеточный автомат, 3D-поверхность, Коллатц, черепашья графика и слот — всё считается прямо в браузере.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>◇</text></svg>">
+  <link rel="stylesheet" href="assets/style.css">
+  <script defer src="assets/demos/ant.js"></script>
+  <script defer src="assets/demos/surface.js"></script>
+  <script defer src="assets/demos/collatz.js"></script>
+  <script defer src="assets/demos/turtle.js"></script>
+  <script defer src="assets/demos/slot.js"></script>
+  <script defer src="assets/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">◇</span>
+        <span>Visual Lab</span>
+      </a>
+      <nav class="nav" aria-label="Визуализации">
+        <a href="#ant">Муравей</a>
+        <a href="#surface">Поверхность</a>
+        <a href="#collatz">Коллатц</a>
+        <a href="#turtle">Черепаха</a>
+        <a href="#slot">Слот</a>
+      </nav>
+      <a class="gh-link" href="https://github.com/TestSoulja/visual-lab" target="_blank" rel="noopener">
+        GitHub <span aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <p class="eyebrow">Пять экспериментов · браузер · без библиотек</p>
+      <h1>Лаборатория<br><span class="grad">визуализаций</span></h1>
+      <p class="lead">
+        Клеточный автомат, математическая поверхность, гипотеза Коллатца,
+        фрактальная графика и симулятор автомата. Всё пересчитано на JavaScript
+        и работает прямо на странице — без установки и сборки.
+      </p>
+      <div class="hero-meta">
+        <span class="chip">Canvas 2D</span>
+        <span class="chip">Интерактив</span>
+        <span class="chip">Только статика</span>
+      </div>
+    </section>
+
+    <!-- 01 · Langton's ant -->
+    <section class="demo" id="ant" data-demo="ant">
+      <header class="demo-head">
+        <span class="demo-num">01</span>
+        <div class="demo-title">
+          <h2>Муравей Лэнгтона</h2>
+          <p>Белая клетка — поворот направо и чёрная метка. Чёрная — поворот налево и белая метка. Из двух правил рождаются симметрия, хаос и «шоссе».</p>
+        </div>
+        <span class="tag">Клеточный автомат</span>
+      </header>
+
+      <div class="demo-body">
+        <div class="stage">
+          <canvas id="ant-canvas" width="900" height="600" aria-label="Поле муравья Лэнгтона 150 на 100 клеток"></canvas>
+        </div>
+
+        <aside class="panel">
+          <div class="buttons">
+            <button id="ant-run" class="btn btn-primary" type="button" aria-pressed="true">Пауза</button>
+            <button id="ant-step" class="btn" type="button">Шаг</button>
+            <button id="ant-reset" class="btn" type="button">Сброс</button>
+          </div>
+
+          <label class="field">
+            <span>Скорость: <output id="ant-speed-out">50</output> шагов/кадр</span>
+            <input id="ant-speed" type="range" min="1" max="2000" step="1" value="50">
+          </label>
+
+          <dl class="stats stats-2">
+            <div><dt>Шагов</dt><dd id="ant-steps">0</dd></div>
+            <div><dt>Чёрных клеток</dt><dd id="ant-black">0</dd></div>
+            <div><dt>Направление</dt><dd id="ant-dir">→ вправо</dd></div>
+            <div><dt>Поле</dt><dd>150 × 100</dd></div>
+          </dl>
+
+          <p class="note">
+            Поле замкнуто в тор: выйдя за край, муравей появляется с противоположной
+            стороны. После ~10 000 шагов рисунок становится хаотичным, а к ~11 000
+            складывается устойчивое «шоссе» из 104 шагов.
+          </p>
+          <p class="keys"><kbd>Пробел</kbd> пауза · <kbd>→</kbd> шаг · <kbd>R</kbd> сброс</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 02 · 3D surface -->
+    <section class="demo" id="surface" data-demo="surface">
+      <header class="demo-head">
+        <span class="demo-num">02</span>
+        <div class="demo-title">
+          <h2>Поверхность <span class="mono">z = sin(√(x² + y²))</span></h2>
+          <p>Трёхмерный график из matplotlib, перерисованный вручную: сетка 10 × 10, простая ортографическая проекция и сортировка граней по глубине.</p>
+        </div>
+        <span class="tag">3D · Canvas</span>
+      </header>
+
+      <div class="demo-body">
+        <div class="stage stage-tall">
+          <canvas id="surface-canvas" aria-label="Трёхмерная поверхность z равно синус корня из x квадрат плюс y квадрат"></canvas>
+          <p class="stage-hint">Потяните, чтобы повернуть · колесо — масштаб</p>
+        </div>
+
+        <aside class="panel">
+          <div class="buttons">
+            <button id="surface-reset" class="btn" type="button">Сбросить вид</button>
+          </div>
+
+          <label class="check">
+            <input id="surface-auto" type="checkbox" checked>
+            <span>Автовращение</span>
+          </label>
+
+          <label class="field">
+            <span>Детализация: <output id="surface-res-out">48</output> × <output id="surface-res-out-2">48</output></span>
+            <input id="surface-res" type="range" min="24" max="72" step="4" value="48">
+          </label>
+
+          <dl class="stats stats-2">
+            <div><dt>Функция</dt><dd>sin(r)</dd></div>
+            <div><dt>Диапазон</dt><dd>−10 … 10</dd></div>
+            <div><dt>Граней</dt><dd id="surface-faces">2 304</dd></div>
+            <div><dt>Высота</dt><dd>−1 … 1</dd></div>
+          </dl>
+
+          <p class="note">
+            Цвет кодирует высоту, а порядок отрисовки — удалённость от камеры.
+            Такой рендер не требует WebGL и работает на обычном 2D-контексте.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 03 · Collatz -->
+    <section class="demo" id="collatz" data-demo="collatz">
+      <header class="demo-head">
+        <span class="demo-num">03</span>
+        <div class="demo-title">
+          <h2>Гипотеза Коллатца</h2>
+          <p>Для чётного числа — деление на два, для нечётного — три n плюс один. Гипотеза утверждает, что любое натуральное число рано или поздно приходит к единице.</p>
+        </div>
+        <span class="tag">3n + 1</span>
+      </header>
+
+      <div class="demo-body">
+        <div class="stage">
+          <canvas id="collatz-canvas" aria-label="График последовательности Коллатца"></canvas>
+        </div>
+
+        <aside class="panel">
+          <form id="collatz-form" class="inline-form">
+            <label class="field">
+              <span>Начальное число</span>
+              <input id="collatz-input" type="number" min="1" max="100000000" step="1" value="27" inputmode="numeric">
+            </label>
+            <button class="btn btn-primary" type="submit">Построить</button>
+          </form>
+
+          <label class="check">
+            <input id="collatz-log" type="checkbox">
+            <span>Логарифмическая шкала</span>
+          </label>
+
+          <dl class="stats stats-2">
+            <div><dt>Шагов</dt><dd id="collatz-steps">—</dd></div>
+            <div><dt>Максимум</dt><dd id="collatz-max">—</dd></div>
+            <div><dt>Длина ряда</dt><dd id="collatz-len">—</dd></div>
+            <div><dt>Пик на шаге</dt><dd id="collatz-peak">—</dd></div>
+          </dl>
+
+          <div class="preset-row">
+            <span>Рекорды:</span>
+            <button class="chip-btn" type="button" data-collatz="27">27</button>
+            <button class="chip-btn" type="button" data-collatz="97">97</button>
+            <button class="chip-btn" type="button" data-collatz="871">871</button>
+            <button class="chip-btn" type="button" id="collatz-random">случайное</button>
+          </div>
+
+          <div id="collatz-seq" class="chips seq-chips" aria-label="Начало последовательности"></div>
+          <p class="note">Число 27 держит рекорд среди небольших значений: 111 шагов и пик 9 232.</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 04 · Turtle -->
+    <section class="demo" id="turtle" data-demo="turtle">
+      <header class="demo-head">
+        <span class="demo-num">04</span>
+        <div class="demo-title">
+          <h2>Фрактальная черепаха</h2>
+          <p>Один цикл из тысячи шагов: черепаха идёт вперёд и поворачивает на угол n, пока n растёт до 250-й итерации, а затем уменьшается.</p>
+        </div>
+        <span class="tag">Line art</span>
+      </header>
+
+      <div class="demo-body">
+        <div class="stage">
+          <canvas id="turtle-canvas" aria-label="Узор, нарисованный черепахой"></canvas>
+        </div>
+
+        <aside class="panel">
+          <div class="buttons">
+            <button id="turtle-play" class="btn btn-primary" type="button">Пауза</button>
+            <button id="turtle-reset" class="btn" type="button">Заново</button>
+          </div>
+
+          <label class="field">
+            <span>Скорость: <output id="turtle-speed-out">6</output> сегментов/кадр</span>
+            <input id="turtle-speed" type="range" min="1" max="40" step="1" value="6">
+          </label>
+
+          <dl class="stats stats-2">
+            <div><dt>Сегментов</dt><dd id="turtle-progress">0 / 1001</dd></div>
+            <div><dt>Итерация</dt><dd id="turtle-iter">0</dd></div>
+            <div><dt>Угол</dt><dd id="turtle-angle">0°</dd></div>
+            <div><dt>Линий</dt><dd>1001</dd></div>
+          </dl>
+
+          <p class="note">
+            Оригинал рисовался модулем <span class="mono">turtle</span> в Python.
+            Здесь тот же алгоритм выполняется на canvas: сначала рассчитываются
+            все точки, затем рисунок вписывается в кадр и проигрывается заново.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 05 · Slot -->
+    <section class="demo" id="slot" data-demo="slot">
+      <header class="demo-head">
+        <span class="demo-num">05</span>
+        <div class="demo-title">
+          <h2>Симулятор слота</h2>
+          <p>Три барабана, шесть символов и фиксированная ставка. Математика ровно как в консольном скрипте: от 500 до 6 000 за три одинаковых.</p>
+        </div>
+        <span class="tag">Симуляция</span>
+      </header>
+
+      <div class="demo-body">
+        <div class="stage stage-slot">
+          <div class="slot" role="group" aria-label="Игровой автомат">
+            <div class="reel" id="slot-reel-0" aria-label="Барабан 1">0</div>
+            <div class="reel" id="slot-reel-1" aria-label="Барабан 2">0</div>
+            <div class="reel" id="slot-reel-2" aria-label="Барабан 3">0</div>
+          </div>
+          <p class="slot-message" id="slot-message" role="status" aria-live="polite">Нажмите «Крутить»</p>
+        </div>
+
+        <aside class="panel">
+          <div class="balance">
+            <span>Баланс</span>
+            <strong id="slot-balance">10 000 $</strong>
+          </div>
+
+          <div class="buttons">
+            <button id="slot-spin" class="btn btn-primary" type="button">Крутить −1 000 $</button>
+            <button id="slot-reset" class="btn" type="button">Сброс</button>
+          </div>
+
+          <dl class="stats stats-2">
+            <div><dt>Спинов</dt><dd id="slot-spins">0</dd></div>
+            <div><dt>Лучший выигрыш</dt><dd id="slot-best">0 $</dd></div>
+          </dl>
+
+          <ul class="payouts" aria-label="Таблица выплат">
+            <li><span>0 0 0</span><b>+6 000</b></li>
+            <li><span>5 5 5</span><b>+5 000</b></li>
+            <li><span>4 4 4</span><b>+3 000</b></li>
+            <li><span>3 3 3</span><b>+2 000</b></li>
+            <li><span>2 2 2</span><b>+1 500</b></li>
+            <li><span>1 1 1</span><b>+500</b></li>
+          </ul>
+
+          <ol class="slot-history" id="slot-history" aria-label="Последние спины"></ol>
+          <p class="note">Виртуальные деньги. Шанс тройки — 1 из 216 на каждую комбинацию.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="sources" id="sources">
+      <header class="section-head">
+        <p class="eyebrow">Первоисточники</p>
+        <h2>Python-версии</h2>
+        <p class="lead">Оригинальные скрипты из репозитория SomeInterestingFun — рядом с браузерными реализациями.</p>
+      </header>
+
+      <div class="source-grid">
+        <a class="source-card" href="python/1_3d_graph.py" target="_blank" rel="noopener">
+          <span class="source-num">01</span>
+          <strong>3D-график</strong>
+          <span>matplotlib · plot_surface</span>
+        </a>
+        <a class="source-card" href="python/2_3x%2B1.py" target="_blank" rel="noopener">
+          <span class="source-num">02</span>
+          <strong>3x + 1</strong>
+          <span>Коллатц · консоль</span>
+        </a>
+        <a class="source-card" href="python/3_Turtle.py" target="_blank" rel="noopener">
+          <span class="source-num">03</span>
+          <strong>Черепаха</strong>
+          <span>turtle · 1000 итераций</span>
+        </a>
+        <a class="source-card" href="python/4_Slot.py" target="_blank" rel="noopener">
+          <span class="source-num">04</span>
+          <strong>Слот</strong>
+          <span>random · консоль</span>
+        </a>
+        <a class="source-card" href="https://github.com/TestSoulja/langton-ant" target="_blank" rel="noopener">
+          <span class="source-num">05</span>
+          <strong>Langton's ant</strong>
+          <span>оригинальный репозиторий</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Visual Lab · собрано из <a href="https://github.com/TestSoulja/langton-ant" target="_blank" rel="noopener">langton-ant</a> и <a href="https://github.com/TestSoulja/SomeInterestingFun" target="_blank" rel="noopener">SomeInterestingFun</a>.</p>
+    <p><a href="#top">Наверх ↑</a></p>
+  </footer>
+</body>
+</html>
